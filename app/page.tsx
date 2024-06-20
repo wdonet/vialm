@@ -1,11 +1,16 @@
-import { Welcome } from '../components/Welcome/Welcome';
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
+'use client';
+
+import { Subjects } from '@/components/Subjects/Subjects';
+import Header from "@/components/Header/Header";
+import { Container } from "@mantine/core";
 
 export default function HomePage() {
   return (
     <>
-      <Welcome />
-      <ColorSchemeToggle />
+      <Header />
+      <Container fluid>
+        <Subjects />
+      </Container>
     </>
   );
 }

@@ -1,11 +1,12 @@
 import '@mantine/core/styles.css';
 import React from 'react';
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
-import { theme } from '../theme';
+import { Notifications } from '@mantine/notifications';
+import { theme } from '@/theme';
 
 export const metadata = {
-  title: 'Mantine Next.js template',
-  description: 'I am using Mantine with Next.js!',
+  title: 'Vial Subjects',
+  description: 'Hope I get the job',
 };
 
 export default function RootLayout({ children }: { children: any }) {
@@ -13,14 +14,17 @@ export default function RootLayout({ children }: { children: any }) {
     <html lang="en">
       <head>
         <ColorSchemeScript />
-        <link rel="shortcut icon" href="/favicon.svg" />
+        <link rel="shortcut icon" href="https://vial.com/wp-content/uploads/2021/09/cropped-favicon_512-32x32.png" />
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>{children}</MantineProvider>
+        <MantineProvider theme={theme}>
+          <Notifications position="bottom-right" zIndex={1000} />
+          {children}
+        </MantineProvider>
       </body>
     </html>
   );
