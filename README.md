@@ -19,6 +19,11 @@ It uses the following:
   - Run `npm start`
   - Can try directly http://localhost:4000/subjects or you might import `postman_collection.json` to your Postman
 
+### Some screenshots
+![image](rdme_light.png)
+![image](rdme_dark.png)
+![image](rdme_drawer.png)
+
 ### Assumptions and design decisions on the FE
 - Decided to use Next.js template for Mantine
 - I added an option for switching between dark/light themes.
