@@ -2,7 +2,7 @@ import classes from './Subjects.module.css';
 import PaginatedTable from '@/components/PaginatedTable/PaginatedTable';
 import { useEffect, useState } from 'react';
 import { SEX, Subject, SUBJECT_STATUS } from "@/app/lib/definitions";
-import { Button, Drawer, Group, SegmentedControl, Text, TextInput } from "@mantine/core";
+import {Button, Drawer, Group, SegmentedControl, Stack, Text, TextInput} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { isNotEmpty, useForm } from "@mantine/form";
 import { DateTimePicker } from '@mantine/dates';
@@ -11,14 +11,7 @@ import dayjs from "dayjs";
 import { notifyError, notifySuccess } from "@/app/lib/notify";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
 import {get} from "@/app/lib/request";
-
-// TODO REMOVE
-// const data: Subject[] = [
-//   { id: 1, name: 'Ozz', sex: SEX['Male'], diagnosis: 'here diagnosis', date: '2021-09-23 09:23', status: SUBJECT_STATUS['In Screening'] },
-//   { id: 2, name: 'Mark', sex: SEX['Male'], diagnosis: 'here diagnosis', date: '2023-10-18 10:56', status: SUBJECT_STATUS['Failed'] },
-//   { id: 3, name: 'Peter', sex: SEX['Male'], diagnosis: 'here diagnosis', date: '2020-07-02 23:59', status: SUBJECT_STATUS['Enrolled'] },
-//   { id: 4, name: 'Martha', sex: SEX['Female'], diagnosis: 'here diagnosis', date: '2024-01-20 15:55', status: SUBJECT_STATUS['Failed'] },
-// ]
+import SearchForm from "@/components/SearchForm/SearchForm";
 
 const formInitialValues = {
   diagnosis: '',
@@ -60,7 +53,7 @@ export const Subjects = () => {
 
   useEffect(() => {
     fetchDataWithParams();
-  }, [active, size]);
+  }, [filters, active, size]);
 
   const fetchDataWithParams = () => {
     const skip = calculateSkip(size, active);
@@ -70,6 +63,10 @@ export const Subjects = () => {
         setSubjects(results.list)
         setTotalRows(results.totalRows)
       })
+  }
+
+  const handleFilter = (filters: Subject) => {
+    setFilters(filters)
   }
 
   const handleCreate = (values: FormValues) => {
@@ -96,9 +93,11 @@ export const Subjects = () => {
   const pages = { active, setPage, setPageSize, size, totalRows}
 
   return (
-    <>
-      <div>Search input txt</div>
-      <Button onClick={open}>Create</Button>
+    <Stack justify="flex-start" gap={12}>
+      <SearchForm onFilter={handleFilter} />
+      <Group justify="flex-end">
+        <Button onClick={open}>Create</Button>
+      </Group>
       <Drawer opened={opened} onClose={close} position="right"
               title={selectedSubject ? `Edit Subject: ${selectedSubject.name}` : 'Create Subject'}>
         <form onSubmit={form.onSubmit(handleCreate)} className={classes.form}>
@@ -107,7 +106,7 @@ export const Subjects = () => {
             {...form.getInputProps('name')}
           />
           <Group justify="flex-start">
-            <Text>Sex</Text>
+            <Text size="sm">Sex</Text>
             <SegmentedControl
               key={form.key('sex')}
               data={[SEX.Male, SEX.Female]}
@@ -118,8 +117,7 @@ export const Subjects = () => {
             key={form.key('diagnosis')}
             {...form.getInputProps('diagnosis')}
           />
-          <DateTimePicker styles={{ root: {'margin-inline': 'unset'}, }}
-                          clearable
+          <DateTimePicker clearable
                           label="Date"
                           placeholder="Pick date and time"
                           nextIcon={<IconArrowRight />}
@@ -130,7 +128,7 @@ export const Subjects = () => {
                           {...form.getInputProps('date')}
           />
           <Group justify="flex-start">
-            <Text>Status</Text>
+            <Text size="sm">Status</Text>
             <SegmentedControl
             key={form.key('status')}
             data={[SUBJECT_STATUS.Enrolled, SUBJECT_STATUS.Failed, SUBJECT_STATUS["In Screening"]]}
@@ -146,6 +144,6 @@ export const Subjects = () => {
       </Drawer>
       {/*// @ts-ignore FIXME*/}
       <PaginatedTable data={subjects} config={configTable} pages={pages} />
-    </>
+    </Stack>
   );
 }

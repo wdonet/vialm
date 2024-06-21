@@ -92,7 +92,7 @@ const PaginatedTable = ({
       <Table striped highlightOnHover withTableBorder withColumnBorders>
         <Thead>
           <Tr>
-            {headers.map(header => <Th key={header.key} >
+            { headers.map(header => <Th key={header.key} >
               <Group justify="flex-start" gap={5}>
                 <ActionIcon size="1.25rem"
                             variant={header.key === fieldSort ? 'filled' : 'outline'}
