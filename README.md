@@ -21,10 +21,12 @@ It uses the following:
 
 ### Assumptions and design decisions on the FE
 - Decided to use Next.js template for Mantine
+- I added an option for switching between dark/light themes.
 - Tried to keep organized code by components, except a couple due to time limit
 - Did not spend time on testing or storybook but the template provides a starting point which I did not remove yet
+- I did not get completely #6 about "Dynamic Interactions", made no sense to me since we already had a filter for name with the rest of parameters.  Thought it as an option to look for similarities and no exact matches. 
 - There are opportunities to improve on TS types, UX, Styling, Testing (of course) and Clean code
-- ...but tried to do my best in this short period of time
+- Also did not complete the Postgress task yet but works with demo data on the api end
 
 ### Other scripts included with the template but not used or verified 100% yet
 

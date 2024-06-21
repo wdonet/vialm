@@ -162,8 +162,8 @@ export const Subjects = () => {
           </Group>
 
           <Group justify="flex-end" mt="xl">
-            <Button type="submit" >{selectedSubject ? 'Update' : 'Add'}</Button>
-            <Button onClick={handleCancelEdition}>Cancel</Button>
+            <Button size="sm" type="submit" >{selectedSubject ? 'Update' : 'Add'}</Button>
+            <Button size="sm" onClick={handleCancelEdition}>Cancel</Button>
           </Group>
         </form>
       </Drawer>

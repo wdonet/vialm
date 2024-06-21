@@ -119,9 +119,9 @@ const PaginatedTable = ({
   return (
     <Stack align="stretch" justify="flex-start" gap="md">
       <Group justify="flex-end">
-        <Text size="sm">Rows per page:</Text>
-        <Select size="sm" value={pageSize} onChange={setPageSize} data={pageSizes} className={classes.pageSize} />
-        <Pagination size="sm" value={activePage} onChange={setPage} total={Math.ceil(totalRows/parseInt(pageSize))} />
+        <Text size="xs">Page size:</Text>
+        <Select size="xs" value={pageSize} onChange={setPageSize} data={pageSizes} className={classes.pageSize} />
+        <Pagination size="xs" value={activePage} onChange={setPage} total={Math.ceil(totalRows/parseInt(pageSize))} />
       </Group>
       <Table striped highlightOnHover withTableBorder withColumnBorders>
         <Thead>
