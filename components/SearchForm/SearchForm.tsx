@@ -1,7 +1,6 @@
 import {ActionIcon, Button, Chip, Group, Select, Stack, TextInput} from "@mantine/core";
 import {IconArrowDown, IconTrash} from "@tabler/icons-react";
 import {ChangeEvent, useState} from "react";
-import {Subject} from "@/app/lib/definitions";
 
 export interface SearchFormProps {
   onFilter: Function

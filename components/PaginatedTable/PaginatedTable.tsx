@@ -12,14 +12,14 @@ import {
 import capitalize from 'lodash.capitalize';
 import { ComboboxItem } from "@mantine/core/lib/components/Combobox";
 import classes from './PaginatedTable.module.css';
-import React, {useState} from "react";
+import React, {ReactElement, useState} from "react";
 import {
   IconAdjustments,
   IconArrowDown,
   IconArrowDownBar,
   IconArrowsUp,
-  IconArrowUp,
-  IconSort09, IconSortAZ, IconSortZA
+  IconArrowUp, IconEdit,
+  IconSort09, IconSortAZ, IconSortZA, IconTrash
 } from "@tabler/icons-react";
 import {byStringKeyObjectSorter} from "@/app/lib/sorter";
 
@@ -28,12 +28,20 @@ interface ColumnConfig {
   key: string
 }
 
+interface ActionConfig {
+  displayName?: string
+  key: string
+  icon?: ReactElement
+  on: Function
+}
+
 export interface PaginatedTableProps {
   data: object[]
   config: {
     columns: ColumnConfig[]
     idKey?: string
   },
+  actions?: ActionConfig[]
   pages: {
     active: number,
     setPage: (value: number) => void,
@@ -50,7 +58,13 @@ interface Header {
 
 const pageSizes = ['10', '20', '30', '50', '100']
 
+const iconsPerAction: {[key:string]: ReactElement} = {
+  edit: <IconEdit size=".95rem"/>,
+  delete: <IconTrash size=".95rem"/>,
+}
+
 const PaginatedTable = ({
+    actions,
     data,
     config: { columns, idKey = 'id', },
     pages: { active: activePage, setPage, setPageSize, size: pageSize, totalRows, }
@@ -75,19 +89,39 @@ const PaginatedTable = ({
   const IconSort = isAscendingSort ? IconSortAZ : IconSortZA
   const headers: Header[] = columns.map(col => ({ display: col.displayName || capitalize(col.key), key: col.key }));
   const keys: string[] = columns.map(col => col.key);
-  const rows = sorted.map(record => (
+  const operations = actions?.map(action => {
+    const operation = { key: action.key, icon: action.icon, display: action.displayName, on: action.on };
+    if(!action.displayName) {
+      operation.display = capitalize(action.key);
+    }
+    if(!action.icon) {
+      operation.icon = iconsPerAction[action.key] || <Text size="xs">{operation.display}</Text>
+    }
+    return operation;
+  });
+  const rows = sorted.map(record => {
     // @ts-ignore FIXME
-    <Tr key={record[idKey]}>
-      {/*// @ts-ignore FIXME */}
-      {keys.map(key => <Td key={`${record[idKey]}${key}`}>{record[key]}</Td>)}
-    </Tr>
-  ));
+    const theId = record[idKey]
+    return (
+      <Tr key={theId}>
+        {/*// @ts-ignore FIXME */}
+        {keys.map(key => <Td key={`${theId}${key}`}>{record[key]}</Td>)}
+        {operations && <Td><Group gap={3}>
+          {operations.map(operation => (
+            <ActionIcon key={`${theId}${operation.key}`} size="1.35rem" onClick={() => operation.on(record)}>
+              {operation.icon}
+            </ActionIcon>
+          ))}
+        </Group></Td>}
+      </Tr>
+    )
+  });
   return (
     <Stack align="stretch" justify="flex-start" gap="md">
       <Group justify="flex-end">
-        <Text>Rows per page:</Text>
-        <Select value={pageSize} onChange={setPageSize} data={pageSizes} className={classes.pageSize}/>
-        <Pagination value={activePage} onChange={setPage} total={Math.ceil(totalRows/parseInt(pageSize))} />
+        <Text size="sm">Rows per page:</Text>
+        <Select size="sm" value={pageSize} onChange={setPageSize} data={pageSizes} className={classes.pageSize} />
+        <Pagination size="sm" value={activePage} onChange={setPage} total={Math.ceil(totalRows/parseInt(pageSize))} />
       </Group>
       <Table striped highlightOnHover withTableBorder withColumnBorders>
         <Thead>

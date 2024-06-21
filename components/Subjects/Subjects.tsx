@@ -10,12 +10,12 @@ import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { notifyError, notifySuccess } from "@/app/lib/notify";
 import {omit} from "next/dist/shared/lib/router/utils/omit";
-import {get} from "@/app/lib/request";
+import {get, post, put, remove} from "@/app/lib/request";
 import SearchForm from "@/components/SearchForm/SearchForm";
 
 const formInitialValues = {
-  diagnosis: '',
   date: '',
+  diagnosis: '',
   name: '',
   sex: SEX.Male,
   status: SUBJECT_STATUS.Enrolled,
@@ -39,7 +39,7 @@ export const Subjects = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedSubject, selectSubject] = useState<Subject>();
+  const [selectedSubject, selectSubject] = useState<Subject | undefined>();
   const [filters, setFilters] = useState<Subject>({} as Subject);
 
   const form = useForm({
@@ -59,9 +59,12 @@ export const Subjects = () => {
     const skip = calculateSkip(size, active);
     const qryParams = { ...filters, skip, take: size }
     get('/subjects', qryParams)
-      .then((results) => {
+      .then(results => {
         setSubjects(results.list)
         setTotalRows(results.totalRows)
+      })
+      .catch((error) => {
+        notifyError('When fetching data', error)
       })
   }
 
@@ -69,17 +72,26 @@ export const Subjects = () => {
     setFilters(filters)
   }
 
-  const handleCreate = (values: FormValues) => {
-    const added: Partial<Subject> = { ...omit(values, ['date']) };
-    added.date = dayjs(values.date).format('YYYY-MM-DD HH:mm');
-    // const skip = calculateSkip(size, active);
-    // console.log({ filters, skip, take: size });
-    Promise.resolve() // TODO API CALL
-    // Promise.reject(new Error('this error'))
+  const handleDelete = (record: {[key:string]:any}) => {
+    remove(`/subjects/${record.id}`)
+      .then(fetchDataWithParams)
       .then(() => {
-        // TODO refresh table
-        setSubjects(subjects);
-        notifySuccess('Subject created');
+        notifySuccess(`Subject deleted: ${record.name}`)
+      })
+      .catch((error) => {
+        notifyError(`When deleting: ${record.name}`, error)
+      })
+  }
+
+  const handleSave = (values: FormValues) => {
+    const subject: Partial<Subject> = { ...omit(values, ['date']) };
+    subject.date = dayjs(values.date).format('YYYY-MM-DD HH:mm');
+    const updateFn = selectedSubject ? put : post;
+    const id = selectedSubject ? '/' + subject.id : '';
+    updateFn(`/subjects${id}`, subject)
+      .then(fetchDataWithParams)
+      .then(() => {
+        notifySuccess(`Subject saved: ${subject.name}`);
       })
       .catch((e) => {
         notifyError('When saving subject', e);
@@ -90,17 +102,30 @@ export const Subjects = () => {
       })
   }
 
-  const pages = { active, setPage, setPageSize, size, totalRows}
+  const handleOpenEdition = (record: Subject) => {
+    selectSubject(record);
+    form.setValues(omit(record, ['date']));
+    // @ts-ignore
+    form.setFieldValue('date', dayjs(record.date));
+    open();
+  }
 
+  const handleCancelEdition = () => {
+    selectSubject(undefined)
+    close()
+  }
+
+  const pages = { active, setPage, setPageSize, size, totalRows}
+  const actions = [ { key: 'edit', on: handleOpenEdition }, { key: 'delete', on: handleDelete }, ]
   return (
     <Stack justify="flex-start" gap={12}>
       <SearchForm onFilter={handleFilter} />
       <Group justify="flex-end">
-        <Button onClick={open}>Create</Button>
+        <Button size="xs" onClick={open}>Create</Button>
       </Group>
       <Drawer opened={opened} onClose={close} position="right"
               title={selectedSubject ? `Edit Subject: ${selectedSubject.name}` : 'Create Subject'}>
-        <form onSubmit={form.onSubmit(handleCreate)} className={classes.form}>
+        <form onSubmit={form.onSubmit(handleSave)} className={classes.form}>
           <TextInput label="Name" placeholder="Name"
             key={form.key('name')}
             {...form.getInputProps('name')}
@@ -138,12 +163,12 @@ export const Subjects = () => {
 
           <Group justify="flex-end" mt="xl">
             <Button type="submit" >{selectedSubject ? 'Update' : 'Add'}</Button>
-            <Button onClick={close}>Cancel</Button>
+            <Button onClick={handleCancelEdition}>Cancel</Button>
           </Group>
         </form>
       </Drawer>
       {/*// @ts-ignore FIXME*/}
-      <PaginatedTable data={subjects} config={configTable} pages={pages} />
+      <PaginatedTable data={subjects} config={configTable} pages={pages} actions={actions} />
     </Stack>
   );
 }

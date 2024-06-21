@@ -15,5 +15,26 @@ export const get = (context: string, queryParams = {}, headers = DEFAULT_HEADERS
     .map(([key, value]) => `${key}=${value}`)
     .join('&')
   return fetch(`${BASE_URL}${context}?${qryString}`, options)
-    .then(getJson)
+    .then(getJson);
 }
+
+export const requestAs = (context: string, payload = {}, headers = DEFAULT_HEADERS, method = 'POST') => {
+  const options: RequestInit = {
+    method,
+    headers,
+  }
+  if (Object.keys(payload).length) {
+    options.body = JSON.stringify(payload);
+  }
+  return fetch(`${BASE_URL}${context}`, options)
+    .then(getJson);
+}
+
+export const post = (context: string, payload = {}, headers = DEFAULT_HEADERS) =>
+  requestAs(context, payload, headers);
+
+export const put = (context: string, payload = {}, headers = DEFAULT_HEADERS) =>
+  requestAs(context, payload, headers, 'PUT');
+
+export const remove = (context: string, payload = {}, headers = DEFAULT_HEADERS) =>
+  requestAs(context, payload, headers, 'DELETE');
