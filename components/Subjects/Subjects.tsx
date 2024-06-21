@@ -65,7 +65,6 @@ export const Subjects = () => {
   const fetchDataWithParams = () => {
     const skip = calculateSkip(size, active);
     const qryParams = { ...filters, skip, take: size }
-    console.log({ qryParams });
     get('/subjects', qryParams)
       .then((results) => {
         setSubjects(results.list)

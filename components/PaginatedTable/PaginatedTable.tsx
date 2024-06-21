@@ -7,11 +7,21 @@ import {
   TableThead as Thead,
   TableTr as Tr,
   Select,
-  Stack, Text,
+  Stack, Text, ActionIcon,
 } from '@mantine/core';
 import capitalize from 'lodash.capitalize';
 import { ComboboxItem } from "@mantine/core/lib/components/Combobox";
 import classes from './PaginatedTable.module.css';
+import React, {useState} from "react";
+import {
+  IconAdjustments,
+  IconArrowDown,
+  IconArrowDownBar,
+  IconArrowsUp,
+  IconArrowUp,
+  IconSort09, IconSortAZ, IconSortZA
+} from "@tabler/icons-react";
+import {byStringKeyObjectSorter} from "@/app/lib/sorter";
 
 interface ColumnConfig {
   displayName?: string
@@ -33,6 +43,11 @@ export interface PaginatedTableProps {
   }
 }
 
+interface Header {
+  display: string,
+  key: string,
+}
+
 const pageSizes = ['10', '20', '30', '50', '100']
 
 const PaginatedTable = ({
@@ -40,9 +55,27 @@ const PaginatedTable = ({
     config: { columns, idKey = 'id', },
     pages: { active: activePage, setPage, setPageSize, size: pageSize, totalRows, }
   }: PaginatedTableProps) => {
-  const headers: string[] = columns.map(col => col.displayName || capitalize(col.key));
+  const [isAscendingSort, setIsAscendingSort] = useState(true);
+  const [fieldSort, setFieldSort] = useState('')
+
+  const sortBy = (key: string) => {
+    // always start with ascending sorting
+    setIsAscendingSort(key !== fieldSort ? true : !isAscendingSort);
+    setFieldSort(key);
+  }
+
+  let sorted = [ ...data ];
+  if (fieldSort) {
+    sorted.sort(
+      byStringKeyObjectSorter(
+        { isAscending: isAscendingSort, keyName: fieldSort }
+      ));
+  }
+
+  const IconSort = isAscendingSort ? IconSortAZ : IconSortZA
+  const headers: Header[] = columns.map(col => ({ display: col.displayName || capitalize(col.key), key: col.key }));
   const keys: string[] = columns.map(col => col.key);
-  const rows = data.map(record => (
+  const rows = sorted.map(record => (
     // @ts-ignore FIXME
     <Tr key={record[idKey]}>
       {/*// @ts-ignore FIXME */}
@@ -59,7 +92,20 @@ const PaginatedTable = ({
       <Table striped highlightOnHover withTableBorder withColumnBorders>
         <Thead>
           <Tr>
-            {headers.map(header => <Th key={header}>{header}</Th>)}
+            {headers.map(header => <Th key={header.key} >
+              <Group justify="flex-start" gap={5}>
+                <ActionIcon size="1.25rem"
+                            variant={header.key === fieldSort ? 'filled' : 'outline'}
+                            onClick={() => sortBy(header.key)}>
+
+                  { header.key === fieldSort
+                    ? <IconSort size="1rem"/>
+                    : <IconSortAZ size="1rem"/>
+                  }
+                </ActionIcon>
+                {header.display}
+              </Group>
+            </Th>)}
           </Tr>
         </Thead>
         <Tbody>{rows}</Tbody>
